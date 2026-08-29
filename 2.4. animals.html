@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm Animal Quiz</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+    overflow: hidden;
+    background: #8ed6ff;
+}
+
+/* =========================
+   SKY
+========================= */
+
+.sky {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+        #8ed6ff 0%,
+        #bcecff 58%,
+        #dff7ff 100%
+    );
+    z-index: -10;
+}
+
+/* =========================
+   CLOUDS
+========================= */
+
+.cloud {
+    position: absolute;
+    font-size: 65px;
+    opacity: 0.85;
+    animation: cloudMove linear infinite;
+}
+
+.cloud1 {
+    top: 8%;
+    left: -120px;
+    animation-duration: 28s;
+}
+
+.cloud2 {
+    top: 20%;
+    left: 30%;
+    animation-duration: 38s;
+}
+
+.cloud3 {
+    top: 5%;
+    left: 70%;
+    animation-duration: 32s;
+}
+
+@keyframes cloudMove {
+    from {
+        transform: translateX(-150px);
+    }
+
+    to {
+        transform: translateX(calc(100vw + 200px));
+    }
+}
+
+/* =========================
+   SUN
+========================= */
+
+.sun {
+    position: absolute;
+    top: 30px;
+    right: 55px;
+    font-size: 85px;
+}
+
+/* =========================
+   FARM
+========================= */
+
+.farm {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+
+    background:
+        linear-gradient(
+            #76ca4e 0%,
+            #55a83d 100%
+        );
+
+    border-top: 8px solid #4b9637;
+}
+
+/* =========================
+   GRASS
+========================= */
+
+.grass {
+    position: absolute;
+    inset: 0;
+
+    background-image:
+        radial-gradient(
+            circle at 10% 30%,
+            #3d8c32 0 4px,
+            transparent 5px
+        ),
+        radial-gradient(
+            circle at 30% 70%,
+            #3d8c32 0 4px,
+            transparent 5px
+        ),
+        radial-gradient(
+            circle at 50% 40%,
+            #3d8c32 0 4px,
+            transparent 5px
+        ),
+        radial-gradient(
+            circle at 75% 65%,
+            #3d8c32 0 4px,
+            transparent 5px
+        ),
+        radial-gradient(
+            circle at 90% 30%,
+            #3d8c32 0 4px,
+            transparent 5px
+        );
+}
+
+/* =========================
+   FENCE
+========================= */
+
+.fence {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    height: 90px;
+}
+
+.fence::before,
+.fence::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background: #c9823c;
+    box-shadow: 0 40px #c9823c;
+}
+
+.fence::before {
+    top: 15px;
+}
+
+.fence::after {
+    top: 55px;
+}
+
+.post {
+    position: absolute;
+    width: 22px;
+    height: 100px;
+    background: #a96530;
+    top: 0;
+}
+
+.post:nth-child(1) {
+    left: 5%;
+}
+
+.post:nth-child(2) {
+    left: 20%;
+}
+
+.post:nth-child(3) {
+    left: 35%;
+}
+
+.post:nth-child(4) {
+    left: 50%;
+}
+
+.post:nth-child(5) {
+    left: 65%;
+}
+
+.post:nth-child(6) {
+    left: 80%;
+}
+
+.post:nth-child(7) {
+    left: 95%;
+}
+
+/* =========================
+   BARN
+========================= */
+
+.barn {
+    position: absolute;
+    left: 7%;
+    bottom: 90px;
+    font-size: 130px;
+}
+
+/* =========================
+   GAME AREA
+========================= */
+
+.game {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+/* =========================
+   TOP PANEL
+========================= */
+
+.top-panel {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: min(90%, 700px);
+
+    text-align: center;
+
+    z-index: 30;
+}
+
+.title {
+    display: inline-block;
+
+    background: white;
+
+    padding: 8px 25px;
+
+    border-radius: 30px;
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    color: #3f7f31;
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,0.15);
+}
+
+.question {
+    margin-top: 10px;
+
+    background: white;
+
+    border: 5px solid #6aaa45;
+
+    border-radius: 25px;
+
+    padding: 12px 30px;
+
+    font-size: clamp(40px, 7vw, 70px);
+
+    font-weight: bold;
+
+    color: #333;
+
+    box-shadow:
+        0 7px 15px rgba(0,0,0,0.18);
+}
+
+/* =========================
+   SCORE
+========================= */
+
+.score {
+    position: absolute;
+
+    top: 25px;
+    right: 25px;
+
+    z-index: 40;
+
+    background: white;
+
+    padding: 10px 20px;
+
+    border-radius: 20px;
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    color: #4d8737;
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* =====================================================
+   ANIMAL CONTAINER
+===================================================== */
+
+.animal {
+    position: absolute;
+
+    z-index: 20;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    width: 130px;
+    height: 130px;
+
+    transform-origin: center bottom;
+
+    filter:
+        drop-shadow(
+            0 8px 5px rgba(0,0,0,0.20)
+        );
+}
+
+/* HOVER */
+
+.animal:hover {
+    filter:
+        drop-shadow(
+            0 10px 7px rgba(0,0,0,0.25)
+        )
+        brightness(1.08);
+}
+
+/* =========================
+   ANIMAL BODY
+========================= */
+
+.animal-body {
+    position: absolute;
+
+    left: 10px;
+    bottom: 20px;
+
+    font-size: 95px;
+
+    line-height: 1;
+
+    transform-origin: center bottom;
+
+    animation:
+        bodyBounce 0.55s infinite alternate ease-in-out;
+}
+
+/* =========================
+   HEAD
+========================= */
+
+.head {
+    position: absolute;
+
+    font-size: 55px;
+
+    line-height: 1;
+
+    transform-origin: center bottom;
+
+    animation:
+        headMove 0.75s infinite alternate ease-in-out;
+}
+
+/* =========================
+   BUFFALO
+========================= */
+
+.water-buffalo {
+    left: 7%;
+    bottom: 23%;
+}
+
+/* =========================
+   GOAT
+========================= */
+
+.goat {
+    left: 34%;
+    bottom: 16%;
+}
+
+/* =========================
+   HORSE
+========================= */
+
+.horse {
+    left: 60%;
+    bottom: 27%;
+}
+
+/* =========================
+   CHICKEN
+========================= */
+
+.chicken {
+    left: 82%;
+    bottom: 13%;
+
+    width: 140px;
+    height: 140px;
+}
+
+/* =========================
+   BIG YELLOW CHICKEN
+========================= */
+
+.chicken .animal-body {
+    font-size: 125px;
+    left: 0;
+    bottom: 5px;
+}
+
+
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+
+@keyframes bodyBounce {
+
+    0% {
+        transform:
+            translateY(0)
+            rotate(-1deg);
+    }
+
+    100% {
+        transform:
+            translateY(-5px)
+            rotate(1deg);
+    }
+}
+
+@keyframes headMove {
+
+    0% {
+        transform:
+            rotate(-4deg)
+            translateY(1px);
+    }
+
+    100% {
+        transform:
+            rotate(5deg)
+            translateY(-3px);
+    }
+}
+
+/* =====================================================
+   FEEDBACK
+===================================================== */
+
+.feedback {
+    position: absolute;
+
+    left: 50%;
+    top: 54%;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0);
+
+    font-size: 130px;
+
+    font-weight: bold;
+
+    z-index: 60;
+
+    pointer-events: none;
+
+    opacity: 0;
+}
+
+.feedback.correct {
+
+    color: #19a947;
+
+    animation:
+        feedbackAnim 0.8s ease forwards;
+}
+
+.feedback.wrong {
+
+    color: #e53935;
+
+    animation:
+        feedbackAnim 0.8s ease forwards;
+}
+
+@keyframes feedbackAnim {
+
+    0% {
+        transform:
+            translate(-50%, -50%)
+            scale(0);
+
+        opacity: 0;
+    }
+
+    35% {
+        transform:
+            translate(-50%, -50%)
+            scale(1.3);
+
+        opacity: 1;
+    }
+
+    70% {
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+
+        opacity: 1;
+    }
+
+    100% {
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+
+        opacity: 0;
+    }
+}
+
+/* =====================================================
+   START / END SCREEN
+===================================================== */
+
+.screen {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(255,255,255,0.92);
+
+    z-index: 100;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+}
+
+.screen h1 {
+
+    font-size:
+        clamp(40px, 7vw, 70px);
+
+    color: #4e9638;
+
+    margin: 10px;
+}
+
+.screen p {
+
+    font-size: 25px;
+
+    color: #555;
+}
+
+.start-button {
+
+    border: none;
+
+    background: #63b448;
+
+    color: white;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    padding: 15px 45px;
+
+    border-radius: 40px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 6px 0 #478934;
+
+    margin-top: 20px;
+}
+
+.start-button:hover {
+
+    background: #75c957;
+}
+
+.start-button:active {
+
+    transform:
+        translateY(5px);
+
+    box-shadow:
+        0 1px 0 #478934;
+}
+
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     SKY
+========================= -->
+
+<div class="sky"></div>
+
+<div class="cloud cloud1">☁️</div>
+<div class="cloud cloud2">☁️</div>
+<div class="cloud cloud3">☁️</div>
+
+<div class="sun">☀️</div>
+
+
+<!-- =========================
+     FARM
+========================= -->
+
+<div class="farm">
+
+    <div class="grass"></div>
+
+    <div class="barn">🏠</div>
+
+    <div class="fence">
+
+        <div class="post"></div>
+        <div class="post"></div>
+        <div class="post"></div>
+        <div class="post"></div>
+        <div class="post"></div>
+        <div class="post"></div>
+        <div class="post"></div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     GAME
+========================= -->
+
+<div class="game">
+
+    <!-- QUESTION -->
+
+    <div class="top-panel">
+
+        <div class="title">
+            🐄 Farm Animal Quiz 🐤
+        </div>
+
+        <div
+            class="question"
+            id="question">
+            水牛
+        </div>
+
+    </div>
+
+
+    <!-- SCORE -->
+
+    <div
+        class="score"
+        id="score">
+
+        ⭐ 0 / 4
+
+    </div>
+
+
+    <!-- =================================================
+         WATER BUFFALO
+    ================================================= -->
+
+    <div
+        class="animal water-buffalo"
+        data-animal="水牛"
+        onclick="chooseAnimal(this)"
+    >
+
+        <div class="animal-body">
+            🐃
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         GOAT
+    ================================================= -->
+
+    <div
+        class="animal goat"
+        data-animal="山羊"
+        onclick="chooseAnimal(this)"
+    >
+
+        <div class="animal-body">
+            🐐
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         HORSE
+    ================================================= -->
+
+    <div
+        class="animal horse"
+        data-animal="马儿"
+        onclick="chooseAnimal(this)"
+    >
+
+        <div class="animal-body">
+            🐎
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         YELLOW CHICKEN
+    ================================================= -->
+
+    <div
+        class="animal chicken"
+        data-animal="母鸡"
+        onclick="chooseAnimal(this)"
+    >
+
+        <div class="animal-body">
+            🐤
+        </div>
+
+    </div>
+
+
+    <!-- FEEDBACK -->
+
+    <div
+        id="feedback"
+        class="feedback">
+    </div>
+
+</div>
+
+
+<!-- =========================
+     START SCREEN
+========================= -->
+
+<div
+    class="screen"
+    id="startScreen">
+
+    <h1>
+        🐮 Farm Animal Quiz 🐤
+    </h1>
+
+    <p>
+        看一看，找到正确的动物！
+    </p>
+
+    <p>
+        Look carefully and find the correct animal!
+    </p>
+
+    <button
+        class="start-button"
+        onclick="startGame()">
+
+        开始游戏
+
+    </button>
+
+</div>
+
+
+<!-- =========================
+     END SCREEN
+========================= -->
+
+<div
+    class="screen hidden"
+    id="endScreen">
+
+    <h1>
+        🎉 太棒了！ 🎉
+    </h1>
+
+    <p id="finalScore"></p>
+
+    <button
+        class="start-button"
+        onclick="restartGame()">
+
+        再玩一次
+
+    </button>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   QUESTIONS
+===================================================== */
+
+const animals = [
+    "水牛",
+    "山羊",
+    "马儿",
+    "母鸡"
+];
+
+let questions = [];
+let currentQuestion = 0;
+let score = 0;
+let canClick = true;
+
+
+/* =====================================================
+   SHUFFLE
+===================================================== */
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+
+/* =====================================================
+   START GAME
+===================================================== */
+
+function startGame() {
+
+    document
+        .getElementById("startScreen")
+        .classList.add("hidden");
+
+    questions = shuffle([...animals]);
+
+    currentQuestion = 0;
+    score = 0;
+    canClick = true;
+
+    updateScore();
+    resetFeedback();
+    showQuestion();
+}
+
+
+/* =====================================================
+   SHOW QUESTION
+===================================================== */
+
+function showQuestion() {
+
+    document
+        .getElementById("question")
+        .textContent =
+        questions[currentQuestion];
+
+    canClick = true;
+    resetFeedback();
+}
+
+
+/* =====================================================
+   RESET FEEDBACK
+===================================================== */
+
+function resetFeedback() {
+
+    const feedback =
+        document.getElementById("feedback");
+
+    feedback.className = "feedback";
+    feedback.textContent = "";
+}
+
+
+/* =====================================================
+   SHOW CORRECT CHECKMARK
+===================================================== */
+
+function showCorrectFeedback() {
+
+    const feedback =
+        document.getElementById("feedback");
+
+    /*
+     * Reset animation completely first.
+     */
+
+    feedback.className = "feedback";
+    feedback.textContent = "";
+
+    /*
+     * Force browser reflow.
+     * This makes the animation restart every time.
+     */
+
+    void feedback.offsetWidth;
+
+    /*
+     * Show green checkmark.
+     */
+
+    feedback.textContent = "✓";
+    feedback.className = "feedback correct";
+}
+
+
+/* =====================================================
+   SHOW WRONG X
+===================================================== */
+
+function showWrongFeedback() {
+
+    const feedback =
+        document.getElementById("feedback");
+
+    feedback.className = "feedback";
+    feedback.textContent = "";
+
+    /*
+     * Force animation restart.
+     */
+
+    void feedback.offsetWidth;
+
+    feedback.textContent = "✕";
+    feedback.className = "feedback wrong";
+}
+
+
+/* =====================================================
+   CHOOSE ANIMAL
+===================================================== */
+
+function chooseAnimal(element) {
+
+    /*
+     * Prevent multiple clicks while
+     * moving to the next question.
+     */
+
+    if (!canClick) {
+        return;
+    }
+
+    const selected =
+        element.dataset.animal;
+
+    const correct =
+        questions[currentQuestion];
+
+
+    /* =================================================
+       CORRECT
+    ================================================= */
+
+    if (selected === correct) {
+
+        score++;
+
+        /*
+         * Lock clicking immediately.
+         */
+
+        canClick = false;
+
+        updateScore();
+
+        /*
+         * ALWAYS show green checkmark.
+         */
+
+        showCorrectFeedback();
+
+
+        /*
+         * Move to next question.
+         */
+
+        setTimeout(() => {
+
+            currentQuestion++;
+
+            if (
+                currentQuestion >=
+                questions.length
+            ) {
+
+                finishGame();
+
+            } else {
+
+                showQuestion();
+
+            }
+
+        }, 900);
+
+    }
+
+
+    /* =================================================
+       WRONG
+    ================================================= */
+
+    else {
+
+        showWrongFeedback();
+
+        /*
+         * Remove X after animation.
+         */
+
+        setTimeout(() => {
+
+            resetFeedback();
+
+        }, 850);
+
+    }
+
+}
+
+
+/* =====================================================
+   SCORE
+===================================================== */
+
+function updateScore() {
+
+    document
+        .getElementById("score")
+        .textContent =
+        "⭐ " +
+        score +
+        " / 4";
+
+}
+
+
+/* =====================================================
+   FINISH GAME
+===================================================== */
+
+function finishGame() {
+
+    setTimeout(() => {
+
+        document
+            .getElementById("finalScore")
+            .textContent =
+            "你的分数是 " +
+            score +
+            " / 4";
+
+        document
+            .getElementById("endScreen")
+            .classList
+            .remove("hidden");
+
+    }, 300);
+
+}
+
+
+/* =====================================================
+   RESTART
+===================================================== */
+
+function restartGame() {
+
+    document
+        .getElementById("endScreen")
+        .classList
+        .add("hidden");
+
+    questions =
+        shuffle([...animals]);
+
+    currentQuestion = 0;
+
+    score = 0;
+
+    canClick = true;
+
+    updateScore();
+
+    resetFeedback();
+
+    showQuestion();
+
+}
+
+
+/* =====================================================
+   ANIMAL WALKING SYSTEM
+=====================================================
+
+   KANAN:
+   - hewan bergerak ke kanan
+   - hewan menghadap kanan
+
+   KIRI:
+   - hewan bergerak ke kiri
+   - hewan menghadap kiri
+
+   Saat berbalik arah,
+   wajah ikut berbalik.
+
+===================================================== */
+
+const walkers = [
+
+    {
+        selector: ".water-buffalo",
+        speed: 0.55,
+        direction: 1
+    },
+
+    {
+        selector: ".goat",
+        speed: 0.65,
+        direction: 1
+    },
+
+    {
+        selector: ".horse",
+        speed: 0.50,
+        direction: 1
+    },
+
+    {
+        selector: ".chicken",
+        speed: 0.75,
+        direction: 1
+    }
+
+];
+
+
+walkers.forEach(walker => {
+
+    const element =
+        document.querySelector(
+            walker.selector
+        );
+
+    let x = 0;
+
+    let direction =
+        walker.direction;
+
+
+    function move() {
+
+        x +=
+            walker.speed *
+            direction;
+
+
+        /* =========================
+           RIGHT LIMIT
+        ========================= */
+
+        if (x >= 100) {
+
+            x = 100;
+
+            direction = -1;
+
+        }
+
+
+        /* =========================
+           LEFT LIMIT
+        ========================= */
+
+        if (x <= -100) {
+
+            x = -100;
+
+            direction = 1;
+
+        }
+
+
+        /*
+         * Emoji animals naturally face LEFT.
+         *
+         * scaleX(1)
+         * = FACE LEFT
+         *
+         * scaleX(-1)
+         * = FACE RIGHT
+         */
+
+        if (direction === 1) {
+
+            /*
+             * WALKING RIGHT
+             * FACE RIGHT
+             */
+
+            element.style.transform =
+                "translateX(" +
+                x +
+                "px) scaleX(-1)";
+
+        }
+
+        else {
+
+            /*
+             * WALKING LEFT
+             * FACE LEFT
+             */
+
+            element.style.transform =
+                "translateX(" +
+                x +
+                "px) scaleX(1)";
+
+        }
+
+
+        requestAnimationFrame(move);
+
+    }
+
+
+    move();
+
+});
+
+</script>
+
+</body>
+</html>
