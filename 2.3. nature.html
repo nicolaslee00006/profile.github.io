@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature Explorer 自然</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f1f8e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            background: white;
+            padding: 15px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 10px solid #81c784;
+        }
+
+        #instruction-box {
+            text-align: center;
+            margin-bottom: 10px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 20px;
+            border: 4px solid #4caf50;
+        }
+
+        #target-text {
+            font-size: 38px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        canvas {
+            background-color: #87CEEB;
+            border-radius: 20px;
+            cursor: crosshair;
+            display: block;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 30px;
+            font-size: 45px;
+            font-weight: bold;
+            color: #2e7d32;
+            display: none;
+            border: 8px solid #4caf50;
+            text-align: center;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="instruction-box">
+            <div id="target-text">Loading...</div>
+        </div>
+        
+        <div id="overlay">Correct! 🌟<br><span style="font-size:24px">Restarting...</span></div>
+        <canvas id="natureCanvas" width="900" height="550"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("natureCanvas");
+        const ctx = canvas.getContext("2d");
+        const targetText = document.getElementById("target-text");
+        const overlay = document.getElementById("overlay");
+
+        const natureObjects = [
+            { id: "ri", hanzi: "日", pinyin: "rì", x: 120, y: 100, r: 50 },
+            { id: "yue", hanzi: "月", pinyin: "yuè", x: 780, y: 100, r: 40 },
+            { id: "xing", hanzi: "星", pinyin: "xīng", x: 450, y: 80, r: 35 },
+            { id: "mu", hanzi: "木", pinyin: "mù", x: 180, y: 460, r: 65 },
+            { id: "he", hanzi: "河", pinyin: "hé", x: 600, y: 480, r: 80 },
+            { id: "hua", hanzi: "花", pinyin: "huā", x: 780, y: 400, r: 45 }
+        ];
+
+        let gameQueue = [];
+        let currentTarget = null;
+        let solvedCount = 0;
+        let feedback = null;
+        let time = 0;
+
+        function init() {
+            gameQueue = [...natureObjects].sort(() => Math.random() - 0.5);
+            solvedCount = 0;
+            overlay.style.display = "none";
+            setTarget();
+            animate();
+        }
+
+        function setTarget() {
+            if (solvedCount < natureObjects.length) {
+                currentTarget = gameQueue[solvedCount];
+                targetText.innerHTML = `Find: <span style="color:#d32f2f">${currentTarget.hanzi}</span> <span style="font-size:24px; color:#555;">(${currentTarget.pinyin})</span>`;
+            } else {
+                overlay.style.display = "block";
+                setTimeout(init, 3000);
+            }
+        }
+
+        canvas.addEventListener("mousedown", (e) => {
+            if (overlay.style.display === "block") return;
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            const dist = Math.sqrt((mx - currentTarget.x)**2 + (my - currentTarget.y)**2);
+            if (dist < currentTarget.r + 35) {
+                feedback = { x: mx, y: my, type: 'correct', timer: 30 };
+                solvedCount++;
+                setTarget();
+            } else {
+                feedback = { x: mx, y: my, type: 'wrong', timer: 30 };
+            }
+        });
+
+        function drawStar(x, y, r, p, m, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.translate(x, y);
+            ctx.moveTo(0, 0 - r);
+            for (let i = 0; i < p; i++) {
+                ctx.rotate(Math.PI / p);
+                ctx.lineTo(0, 0 - (r * m));
+                ctx.rotate(Math.PI / p);
+                ctx.lineTo(0, 0 - r);
+            }
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawCloud(x, y, scale) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.arc(25, -10, 25, 0, Math.PI * 2);
+            ctx.arc(55, 0, 20, 0, Math.PI * 2);
+            ctx.arc(25, 10, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // 🌲 FUNGSI LOG KAYU 3D UTUH & RAPI
+        function drawSolid3DLog(ctx, x, y, length, radius) {
+            ctx.save();
+            
+            // Menentukan arah serong ke belakang kanan atas (isometric 30 derajat)
+            const lengthX = length * 0.866; // cos(30 deg)
+            const lengthY = -length * 0.5;  // sin(30 deg)
+
+            // 1. Gambar penutup belakang dulu (agar tidak tembus)
+            ctx.fillStyle = "#3e2723"; // Warna cokelat gelap untuk bagian belakang
+            ctx.beginPath();
+            ctx.arc(x + lengthX, y + lengthY, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. Gambar Batang Utama (Bark / Kulit Kayu) menghubungkan depan dan belakang
+            ctx.fillStyle = "#5d4037"; // Cokelat kulit kayu utuh
+            ctx.strokeStyle = "#3e2723";
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            // Titik atas lingkaran depan ke titik atas lingkaran belakang
+            ctx.moveTo(x, y - radius);
+            ctx.lineTo(x + lengthX, y + lengthY - radius);
+            // Melengkung mengikuti lingkaran belakang
+            ctx.arc(x + lengthX, y + lengthY, radius, -Math.PI / 2, Math.PI / 2, false);
+            // Titik bawah lingkaran belakang ke titik bawah lingkaran depan
+            ctx.lineTo(x, y + radius);
+            // Melengkung menutup di lingkaran depan
+            ctx.arc(x, y, radius, Math.PI / 2, -Math.PI / 2, false);
+            ctx.fill();
+            ctx.stroke();
+
+            // Efek bayangan shading 3D bulat pada batang agar realistis
+            let logGrad = ctx.createLinearGradient(x, y - radius, x, y + radius);
+            logGrad.addColorStop(0, "rgba(0,0,0,0.35)");
+            logGrad.addColorStop(0.3, "rgba(0,0,0,0)");
+            logGrad.addColorStop(0.7, "rgba(0,0,0,0)");
+            logGrad.addColorStop(1, "rgba(0,0,0,0.45)");
+            ctx.fillStyle = logGrad;
+            ctx.fill();
+
+            // Serat guratan kulit kayu memanjang utuh ke belakang
+            ctx.strokeStyle = "rgba(62, 39, 35, 0.4)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y - radius*0.3); ctx.lineTo(x + lengthX, y + lengthY - radius*0.3);
+            ctx.moveTo(x + radius, y + radius*0.4); ctx.lineTo(x + lengthX, y + lengthY + radius*0.4);
+            ctx.stroke();
+
+            // 3. Gambar lingkaran penampang depan secara UTUH (Menutupi batang belakang)
+            ctx.fillStyle = "#d7ccc8"; // Warna krem daging kayu halus
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Detail Cincin Tahun Pohon di penampang depan
+            ctx.strokeStyle = "rgba(62, 39, 35, 0.4)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(x, y, radius * 0.6, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x, y, radius * 0.3, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawScene() {
+            time += 0.05;
+            
+            // Sky & Mountains
+            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, 900, 550);
+            ctx.fillStyle = "#90a4ae";
+            ctx.beginPath(); ctx.moveTo(250, 350); ctx.lineTo(450, 120); ctx.lineTo(650, 350); ctx.fill();
+            ctx.fillStyle = "#78909c";
+            ctx.beginPath(); ctx.moveTo(50, 350); ctx.lineTo(250, 180); ctx.lineTo(450, 350); ctx.fill();
+
+            // Ground
+            ctx.fillStyle = "#81c784"; ctx.fillRect(0, 350, 900, 200);
+
+            // 日 (Sun)
+            ctx.fillStyle = "#ffeb3b";
+            ctx.beginPath(); ctx.arc(120, 100, 50, 0, Math.PI*2); ctx.fill();
+            
+            // 月 (Moon)
+            ctx.fillStyle = "#fff9c4";
+            ctx.beginPath(); ctx.arc(780, 100, 40, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#87CEEB"; 
+            ctx.beginPath(); ctx.arc(805, 100, 38, 0, Math.PI*2); ctx.fill();
+
+            // 星 (Star)
+            const starOpacity = Math.abs(Math.sin(time * 1.5));
+            drawStar(450, 80, 25, 5, 0.5, starOpacity);
+
+            // Clouds
+            drawCloud(200 + (time * 15) % 1100 - 150, 140, 0.8);
+            drawCloud(600 + (time * 10) % 1100 - 150, 80, 1.1);
+
+            // 河 (River)
+            ctx.fillStyle = "#4fc3f7";
+            ctx.beginPath();
+            ctx.moveTo(400, 350);
+            ctx.bezierCurveTo(450, 450, 750, 450, 900, 500);
+            ctx.lineTo(900, 550);
+            ctx.lineTo(500, 550);
+            ctx.lineTo(400, 350);
+            ctx.fill();
+
+            // Riak Sungai Swaying
+            const sway = Math.sin(time) * 10;
+            ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 3; ctx.beginPath();
+            ctx.moveTo(550 + sway, 480); ctx.lineTo(750 + sway, 480);
+            ctx.moveTo(600 - sway, 510); ctx.lineTo(800 - sway, 510);
+            ctx.stroke();
+
+            // 木 (Wood Logs) - 🌟 Tumpukan 3D Utuh Sempurna (2 Bawah, 1 Atas)
+            drawSolid3DLog(ctx, 130, 485, 95, 23);  // Kiri Bawah
+            drawSolid3DLog(ctx, 215, 485, 95, 23);  // Kanan Bawah
+            drawSolid3DLog(ctx, 172, 448, 95, 23);  // Atas Tengah (Mengunci tumpukan)
+
+            // 花 (Flowers)
+            const flowerSway = Math.sin(time) * 5;
+            [[780, 430], [840, 450], [720, 460]].forEach(p => {
+                ctx.strokeStyle = "#388e3c"; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(p[0], p[1]); 
+                ctx.quadraticCurveTo(p[0]+flowerSway, p[1]-20, p[0]+flowerSway, p[1]-40); ctx.stroke();
+                ctx.fillStyle = "#f06292"; ctx.beginPath(); ctx.arc(p[0]+flowerSway, p[1]-45, 12, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffeb3b"; ctx.beginPath(); ctx.arc(p[0]+flowerSway, p[1]-45, 5, 0, Math.PI*2); ctx.fill();
+            });
+        }
+
+        function drawFeedback() {
+            if (!feedback) return;
+            ctx.lineWidth = 8;
+            if (feedback.type === 'correct') {
+                ctx.strokeStyle = "#4caf50";
+                ctx.beginPath(); ctx.arc(feedback.x, feedback.y, 40, 0, Math.PI*2); ctx.stroke();
+            } else {
+                ctx.strokeStyle = "#f44336";
+                ctx.beginPath();
+                ctx.moveTo(feedback.x-25, feedback.y-25); ctx.lineTo(feedback.x+25, feedback.y+25);
+                ctx.moveTo(feedback.x+25, feedback.y-25); ctx.lineTo(feedback.x-25, feedback.y+25);
+                ctx.stroke();
+            }
+            feedback.timer--; if (feedback.timer <= 0) feedback = null;
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, 900, 550);
+            drawScene();
+            drawFeedback();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+    </script>
+</body>
+</html>
